@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EMI Tracker Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg: #f0f4f8;
+            --surface: #ffffff;
+            --surface2: #f8fafc;
+            --border: #e2e8f0;
+            --text: #0f172a;
+            --muted: #64748b;
+            --ac: #0369a1;
+            --ac-light: #e0f2fe;
+            --ac-border: #bae6fd;
+            --mob: #b45309;
+            --mob-light: #fef3c7;
+            --mob-border: #fde68a;
+            --green: #15803d;
+            --green-bg: #dcfce7;
+            --amber: #b45309;
+            --amber-bg: #fef3c7;
+            --radius: 16px;
+            --shadow: 0 4px 20px rgba(15,23,42,0.07);
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 28px 20px;
+        }
+
+        .shell { max-width: 1100px; margin: 0 auto; }
+
+        /* ── TOP BAR ── */
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 14px 22px;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow);
+        }
+
+        .save-badge {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--green);
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+        .save-badge .dot {
+            width: 8px; height: 8px;
+            background: var(--green);
+            border-radius: 50%;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%,100% { opacity:1; transform:scale(1); }
+            50% { opacity:.4; transform:scale(1.4); }
+        }
+
+        .btn-group { display: flex; gap: 10px; flex-wrap: wrap; }
+
+        .btn {
+            border: none; cursor: pointer;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 13px; font-weight: 600;
+            padding: 10px 18px;
+            border-radius: 10px;
+            display: flex; align-items: center; gap: 7px;
+            transition: all .18s ease;
+        }
+        .btn-outline {
+            background: transparent;
+            border: 1.5px solid var(--border);
+            color: var(--text);
+        }
+        .btn-outline:hover { border-color: #94a3b8; background: var(--surface2); }
+
+        .btn-primary {
+            background: var(--ac);
+            color: #fff;
+            box-shadow: 0 3px 10px rgba(3,105,161,.25);
+        }
+        .btn-primary:hover { background: #0284c7; transform: translateY(-1px); box-shadow: 0 6px 16px rgba(3,105,161,.3); }
+
+        .btn-danger {
+            background: #dc2626;
+            color: #fff;
+            box-shadow: 0 3px 10px rgba(220,38,38,.2);
+        }
+        .btn-danger:hover { background: #b91c1c; transform: translateY(-1px); }
+
+        /* ── HEADER ── */
+        .hero {
+            background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 60%, #0369a1 100%);
+            color: white;
+            border-radius: var(--radius);
+            padding: 36px 32px;
+            margin-bottom: 24px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 8px 30px rgba(15,23,42,.2);
+        }
+        .hero::before {
+            content: '';
+            position: absolute; inset: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Ccircle cx='30' cy='30' r='30'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat;
+        }
+        .hero-inner { position: relative; z-index: 1; }
+        .hero h1 {
+            font-family: 'DM Serif Display', serif;
+            font-size: 30px; font-weight: 400;
+            letter-spacing: -0.5px;
+            margin-bottom: 6px;
+        }
+        .hero p { opacity: .65; font-size: 14px; font-weight: 300; }
+
+        /* ── STATS ROW ── */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+        }
+        .stat-card::after {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0;
+            height: 3px;
+        }
+        .stat-card.ac::after { background: var(--ac); }
+        .stat-card.mob::after { background: var(--mob); }
+        .stat-card.total::after { background: #7c3aed; }
+        .stat-card.paid::after { background: var(--green); }
+
+        .stat-label {
+            font-size: 11px; font-weight: 600; text-transform: uppercase;
+            letter-spacing: .8px; color: var(--muted); margin-bottom: 8px;
+        }
+        .stat-value {
+            font-family: 'DM Serif Display', serif;
+            font-size: 26px; color: var(--text); line-height: 1;
+        }
+        .stat-sub { font-size: 12px; color: var(--muted); margin-top: 6px; }
+
+        /* ── SECTION CARDS ── */
+        .section-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            margin-bottom: 24px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
+        .section-head {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 18px 24px 16px;
+            border-bottom: 1px solid var(--border);
+        }
+        .section-title {
+            font-size: 16px; font-weight: 700;
+            display: flex; align-items: center; gap: 9px;
+        }
+        .section-title.ac { color: var(--ac); }
+        .section-title.mob { color: var(--mob); }
+        .section-badge {
+            font-size: 11px; font-weight: 600;
+            padding: 3px 10px; border-radius: 20px;
+        }
+        .badge-ac { background: var(--ac-light); color: var(--ac); }
+        .badge-mob { background: var(--mob-light); color: var(--mob); }
+
+        /* ── TABLE ── */
+        .table-wrap { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+        th {
+            background: var(--surface2);
+            color: var(--muted);
+            font-size: 10.5px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: .8px;
+            padding: 12px 16px;
+            border-bottom: 2px solid var(--border);
+            white-space: nowrap;
+        }
+        td {
+            padding: 10px 16px;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle;
+        }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: #f8fafc; }
+
+        /* Inputs inside table */
+        .table-input {
+            width: 100%; padding: 7px 10px;
+            border: 1.5px solid var(--border);
+            border-radius: 8px; font-size: 13px;
+            font-family: 'DM Sans', sans-serif;
+            background: var(--surface2); color: var(--text);
+            transition: border-color .15s;
+        }
+        .table-input:focus { outline: none; border-color: var(--ac); background: #fff; }
+
+        select.table-input { cursor: pointer; font-weight: 600; }
+        select.status-paid { background: var(--green-bg) !important; color: var(--green) !important; border-color: #86efac !important; }
+        select.status-pending { background: var(--amber-bg) !important; color: var(--amber) !important; border-color: #fde68a !important; }
+
+        .sl-num { font-weight: 700; color: var(--muted); font-size: 12px; }
+        .due-date { font-weight: 600; font-size: 13px; }
+
+        /* ── FOOTER ── */
+        .footer-note {
+            display: none; /* hidden in browser, shown only during PDF export */
+            text-align: center; color: var(--muted);
+            font-size: 12px; padding: 20px 0 4px;
+        }
+
+        /* ── MODAL OVERLAY ── */
+        .modal-overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(15,23,42,.5);
+            z-index: 100; align-items: center; justify-content: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal {
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: 28px 32px;
+            max-width: 420px; width: 90%;
+            box-shadow: 0 20px 60px rgba(15,23,42,.25);
+        }
+        .modal h3 { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+        .modal p { color: var(--muted); font-size: 14px; margin-bottom: 22px; }
+        .modal-btns { display: flex; gap: 10px; justify-content: flex-end; }
+
+        /* ── PDF-ONLY CONTENT ── */
+        #pdf-content { background: #ffffff; }
+
+        /* ── PRINT/PDF OVERRIDES ── */
+        @media print {
+            body { background: white; padding: 0; }
+            .topbar, .modal-overlay { display: none !important; }
+            .section-card { box-shadow: none; page-break-inside: avoid; }
+        }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 640px) {
+            .hero h1 { font-size: 22px; }
+            .stats-grid { grid-template-columns: 1fr 1fr; }
+            th, td { padding: 9px 10px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="shell">
+
+    <!-- Top Action Bar -->
+    <div class="topbar">
+        <div class="save-badge">
+            <span class="dot"></span>
+            <span id="storage-msg">Auto-Save Active</span>
+        </div>
+        <div class="btn-group">
+            <button class="btn btn-outline" onclick="downloadHTML()">💾 Save HTML</button>
+            <button class="btn btn-outline" onclick="showResetModal()">🔄 Reset Data</button>
+            <button class="btn btn-primary" onclick="downloadPDF()">📄 Download PDF</button>
+        </div>
+    </div>
+
+    <!-- PDF-exportable content starts here -->
+    <div id="pdf-content">
+
+        <!-- Hero Header -->
+        <div class="hero">
+            <div class="hero-inner">
+                <h1>📊 EMI </h1>
+                <p>AC &amp; Mobile EMI </p>
+            </div>
+        </div>
+
+        <!-- Summary Stats -->
+        <div class="stats-grid" id="stats-grid">
+            <div class="stat-card ac">
+                <div class="stat-label">AC Total EMI</div>
+                <div class="stat-value" id="stat-ac-total">—</div>
+                <div class="stat-sub" id="stat-ac-sub">Loading…</div>
+            </div>
+            <div class="stat-card mob">
+                <div class="stat-label">Mobile Total EMI</div>
+                <div class="stat-value" id="stat-mob-total">—</div>
+                <div class="stat-sub" id="stat-mob-sub">Loading…</div>
+            </div>
+            <div class="stat-card paid">
+                <div class="stat-label">Total Paid</div>
+                <div class="stat-value" id="stat-paid">—</div>
+                <div class="stat-sub" id="stat-paid-sub">Combined</div>
+            </div>
+            <div class="stat-card total">
+                <div class="stat-label">Outstanding</div>
+                <div class="stat-value" id="stat-pending">—</div>
+                <div class="stat-sub" id="stat-pending-sub">Remaining</div>
+            </div>
+        </div>
+
+        <!-- AC Table -->
+        <div class="section-card">
+            <div class="section-head">
+                <div class="section-title ac">❄️ AC EMI Tracker</div>
+                <span class="section-badge badge-ac">Due every 22nd</span>
+            </div>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width:6%">Sl</th>
+                            <th style="width:14%">Due Date</th>
+                            <th style="width:22%">Description</th>
+                            <th style="width:18%">Amount (₹)</th>
+                            <th style="width:18%">Payment Date</th>
+                            <th style="width:22%">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ac-tbody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Mobile Table -->
+        <div class="section-card">
+            <div class="section-head">
+                <div class="section-title mob">📱 Mobile EMI Tracker</div>
+                <span class="section-badge badge-mob">Due every 7th</span>
+            </div>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width:6%">Sl</th>
+                            <th style="width:14%">Due Date</th>
+                            <th style="width:22%">Description</th>
+                            <th style="width:18%">Amount (₹)</th>
+                            <th style="width:18%">Payment Date</th>
+                            <th style="width:22%">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="mob-tbody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="footer-note" id="pdf-footer">
+            Generated on <span id="gen-date"></span> — EMI Tracker Pro
+        </div>
+
+    </div><!-- /#pdf-content -->
+</div><!-- /.shell -->
+
+<!-- Reset Confirmation Modal -->
+<div class="modal-overlay" id="reset-modal">
+    <div class="modal">
+        <h3>⚠️ Reset All Data?</h3>
+        <p>This will clear all saved amounts, payment dates, and statuses and restore defaults. This action cannot be undone.</p>
+        <div class="modal-btns">
+            <button class="btn btn-outline" onclick="hideResetModal()">Cancel</button>
+            <button class="btn btn-danger" onclick="resetData()">Yes, Reset</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// ─── DEFAULT DATA ───────────────────────────────────────────────
+const DEFAULT_AC = [
+    { sl:1, date:"22-03-2026", desc:"Processing Fee", amt:"352.82", pDate:"2026-03-24", status:"Paid" },
+    { sl:2, date:"22-04-2026", desc:"EMI 1",          amt:"5210.74", pDate:"2026-04-24", status:"Paid" },
+    { sl:3, date:"22-05-2026", desc:"EMI 2",          amt:"5210.74", pDate:"2026-05-26", status:"Paid" },
+    { sl:4, date:"22-06-2026", desc:"EMI 3",          amt:"5210.74", pDate:"", status:"Pending" },
+    { sl:5, date:"22-07-2026", desc:"EMI 4",          amt:"5210.74", pDate:"", status:"Pending" },
+    { sl:6, date:"22-08-2026", desc:"EMI 5",          amt:"5210.74", pDate:"", status:"Pending" },
+    { sl:7, date:"22-09-2026", desc:"EMI 6",          amt:"5210.74", pDate:"", status:"Pending" }
+];
+
+const DEFAULT_MOB = [
+    { sl:1, date:"07-06-2026", desc:"Processing Fee", amt:"", pDate:"", status:"Pending" },
+    { sl:2, date:"07-07-2026", desc:"EMI 1",          amt:"", pDate:"", status:"Pending" },
+    { sl:3, date:"07-08-2026", desc:"EMI 2",          amt:"", pDate:"", status:"Pending" },
+    { sl:4, date:"07-09-2026", desc:"EMI 3",          amt:"", pDate:"", status:"Pending" },
+    { sl:5, date:"07-10-2026", desc:"EMI 4",          amt:"", pDate:"", status:"Pending" },
+    { sl:6, date:"07-11-2026", desc:"EMI 5",          amt:"", pDate:"", status:"Pending" },
+    { sl:7, date:"07-12-2026", desc:"EMI 6",          amt:"", pDate:"", status:"Pending" }
+];
+
+// ─── STATE ───────────────────────────────────────────────────────
+let acData   = JSON.parse(localStorage.getItem('emi_pro_ac'))  || JSON.parse(JSON.stringify(DEFAULT_AC));
+let mobData  = JSON.parse(localStorage.getItem('emi_pro_mob')) || JSON.parse(JSON.stringify(DEFAULT_MOB));
+
+// ─── RENDER ──────────────────────────────────────────────────────
+function renderAll() {
+    renderTable('ac-tbody',  acData,  'ac');
+    renderTable('mob-tbody', mobData, 'mob');
+    updateStats();
+    document.getElementById('gen-date').textContent = new Date().toLocaleDateString('en-IN', { day:'2-digit', month:'long', year:'numeric' });
+}
+
+function renderTable(tbodyId, data, prefix) {
+    const tbody = document.getElementById(tbodyId);
+    tbody.innerHTML = '';
+    data.forEach((row, i) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML =
+            `<td class="sl-num">${row.sl}</td>` +
+            `<td class="due-date">${row.date}</td>` +
+            `<td>${row.desc}</td>` +
+            `<td><input class="table-input" type="number" step="0.01" min="0" value="${row.amt}" placeholder="0.00"
+                 oninput="save('${prefix}',${i},'amt',this.value)"></td>` +
+            `<td><input class="table-input" type="date" value="${row.pDate}"
+                 onchange="save('${prefix}',${i},'pDate',this.value)"></td>` +
+            `<td>
+                <select class="table-input ${row.status==='Paid'?'status-paid':'status-pending'}"
+                    onchange="save('${prefix}',${i},'status',this.value);applyStatusClass(this)">
+                    <option value="Paid"    ${row.status==='Paid'   ?'selected':''}>✅ Paid</option>
+                    <option value="Pending" ${row.status==='Pending'?'selected':''}>⏳ Pending</option>
+                </select>
+             </td>`;
+        tbody.appendChild(tr);
+    });
+}
+
+function applyStatusClass(sel) {
+    sel.className = 'table-input ' + (sel.value === 'Paid' ? 'status-paid' : 'status-pending');
+}
+
+// ─── SAVE ─────────────────────────────────────────────────────────
+function save(prefix, index, field, value) {
+    if (prefix === 'ac') {
+        acData[index][field] = value;
+        localStorage.setItem('emi_pro_ac', JSON.stringify(acData));
+    } else {
+        mobData[index][field] = value;
+        localStorage.setItem('emi_pro_mob', JSON.stringify(mobData));
+    }
+    updateStats();
+    flashSave();
+}
+
+function flashSave() {
+    const el = document.getElementById('storage-msg');
+    el.textContent = '⚡ Saved!';
+    setTimeout(() => { el.textContent = 'Auto-Save Active'; }, 1400);
+}
+
+// ─── STATS ────────────────────────────────────────────────────────
+function sum(data) {
+    return data.reduce((t, r) => t + (parseFloat(r.amt) || 0), 0);
+}
+function paidSum(data) {
+    return data.filter(r => r.status === 'Paid').reduce((t, r) => t + (parseFloat(r.amt) || 0), 0);
+}
+function fmt(n) {
+    return '₹' + n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function updateStats() {
+    const acTotal  = sum(acData);
+    const mobTotal = sum(mobData);
+    const paidAmt  = paidSum(acData) + paidSum(mobData);
+    const pending  = (acTotal + mobTotal) - paidAmt;
+
+    const acPaid    = acData.filter(r=>r.status==='Paid').length;
+    const mobPaid   = mobData.filter(r=>r.status==='Paid').length;
+
+    document.getElementById('stat-ac-total').textContent  = fmt(acTotal);
+    document.getElementById('stat-ac-sub').textContent    = `${acPaid}/${acData.length} paid`;
+    document.getElementById('stat-mob-total').textContent = fmt(mobTotal);
+    document.getElementById('stat-mob-sub').textContent   = `${mobPaid}/${mobData.length} paid`;
+    document.getElementById('stat-paid').textContent      = fmt(paidAmt);
+    document.getElementById('stat-paid-sub').textContent  = `${acPaid+mobPaid} installments paid`;
+    document.getElementById('stat-pending').textContent   = fmt(pending > 0 ? pending : 0);
+    document.getElementById('stat-pending-sub').textContent = `${(acData.length+mobData.length)-(acPaid+mobPaid)} installments left`;
+}
+
+// ─── RESET ────────────────────────────────────────────────────────
+function showResetModal() { document.getElementById('reset-modal').classList.add('active'); }
+function hideResetModal() { document.getElementById('reset-modal').classList.remove('active'); }
+function resetData() {
+    acData  = JSON.parse(JSON.stringify(DEFAULT_AC));
+    mobData = JSON.parse(JSON.stringify(DEFAULT_MOB));
+    localStorage.setItem('emi_pro_ac',  JSON.stringify(acData));
+    localStorage.setItem('emi_pro_mob', JSON.stringify(mobData));
+    hideResetModal();
+    renderAll();
+}
+
+// ─── HTML DOWNLOAD ────────────────────────────────────────────────
+function downloadHTML() {
+    const html = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+    const blob = new Blob([html], { type: 'text/html' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'emi_tracker_pro_backup.html';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+}
+
+// ─── PDF DOWNLOAD ─────────────────────────────────────────────────
+async function downloadPDF() {
+    const btn = document.querySelector('.btn-primary');
+    const origText = btn.innerHTML;
+    btn.innerHTML = '⏳ Generating…';
+    btn.disabled = true;
+
+    const pdfEl = document.getElementById('pdf-content');
+
+    // ── 1. Flatten inputs & selects to plain text ──
+    const inputs  = pdfEl.querySelectorAll('input');
+    const selects = pdfEl.querySelectorAll('select');
+    const ghosts  = [];
+
+    inputs.forEach(inp => {
+        const s = document.createElement('span');
+        s.style.cssText = 'font-size:11px;font-weight:500;display:block;';
+        s.textContent = inp.value || '—';
+        inp.parentNode.insertBefore(s, inp);
+        inp.style.display = 'none';
+        ghosts.push({ el: inp, ghost: s });
+    });
+
+    selects.forEach(sel => {
+        const isPaid = sel.value === 'Paid';
+        const s = document.createElement('span');
+        s.style.cssText = `font-size:10px;font-weight:700;display:inline-block;padding:2px 8px;
+            border-radius:20px;background:${isPaid?'#dcfce7':'#fef3c7'};
+            color:${isPaid?'#15803d':'#b45309'}`;
+        s.textContent = isPaid ? '✅ Paid' : '⏳ Pending';
+        sel.parentNode.insertBefore(s, sel);
+        sel.style.display = 'none';
+        ghosts.push({ el: sel, ghost: s });
+    });
+
+    // ── 2. Hide UI-only elements ──
+    document.querySelector('.topbar').style.display    = 'none';
+    document.getElementById('stats-grid').style.display = 'none';
+    document.getElementById('pdf-footer').style.display = 'none';
+
+    // ── 3. Compact PDF styles ──
+    const hero = document.querySelector('.hero');
+    hero.style.cssText = 'padding:12px 20px;margin-bottom:10px;border-radius:10px;';
+
+    const heroH1 = hero.querySelector('h1');
+    heroH1.style.cssText = 'font-size:18px;margin-bottom:2px;';
+    const heroP = hero.querySelector('p');
+    heroP.style.cssText = 'font-size:11px;opacity:.7;';
+
+    document.querySelectorAll('.section-card').forEach(c => {
+        c.style.marginBottom = '10px';
+        c.style.borderRadius = '8px';
+    });
+    document.querySelectorAll('.section-head').forEach(h => {
+        h.style.padding = '10px 14px 8px';
+    });
+    document.querySelectorAll('.section-title').forEach(t => {
+        t.style.fontSize = '13px';
+    });
+    document.querySelectorAll('th').forEach(t => {
+        t.style.cssText = 'padding:6px 10px;font-size:9px;';
+    });
+    document.querySelectorAll('td').forEach(t => {
+        t.style.cssText = 'padding:5px 10px;font-size:11px;';
+    });
+
+    // ── 4. Generate PDF ──
+    const today = new Date().toISOString().slice(0,10);
+    const opt = {
+        margin:      [6, 6, 6, 6],
+        filename:    `EMI_Tracker_Pro_${today}.pdf`,
+        image:       { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2.5, useCORS: true, logging: false, letterRendering: true },
+        jsPDF:       { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        pagebreak:   { mode: ['avoid-all'] }
+    };
+
+    try {
+        await html2pdf().set(opt).from(pdfEl).save();
+    } catch(e) {
+        alert('PDF generation failed. Please try again.');
+        console.error(e);
+    }
+
+    // ── 5. Restore everything ──
+    ghosts.forEach(({ el, ghost }) => { el.style.display = ''; ghost.remove(); });
+
+    document.querySelector('.topbar').style.display    = '';
+    document.getElementById('stats-grid').style.display = '';
+    document.getElementById('pdf-footer').style.display = 'none';
+
+    hero.style.cssText = '';
+    heroH1.style.cssText = '';
+    heroP.style.cssText  = '';
+
+    document.querySelectorAll('.section-card').forEach(c => { c.style.marginBottom = ''; c.style.borderRadius = ''; });
+    document.querySelectorAll('.section-head').forEach(h => { h.style.padding = ''; });
+    document.querySelectorAll('.section-title').forEach(t => { t.style.fontSize = ''; });
+    document.querySelectorAll('th').forEach(t => { t.style.cssText = ''; });
+    document.querySelectorAll('td').forEach(t => { t.style.cssText = ''; });
+
+    btn.innerHTML = origText;
+    btn.disabled = false;
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────
+renderAll();
+</script>
+</body>
+</html>
