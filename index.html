@@ -1,10 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
+<html lang="en"><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EMI Tracker Pro</title>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&amp;family=DM+Sans:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -274,6 +273,110 @@
             .stats-grid { grid-template-columns: 1fr 1fr; }
             th, td { padding: 9px 10px; }
         }
+
+        /* ── GOOGLE PAY STYLE REMINDER ── */
+        .gpay-reminder {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            background: linear-gradient(135deg, #1a73e8 0%, #0f5cbf 100%);
+            color: #fff;
+            border-radius: 16px;
+            padding: 18px 22px;
+            margin-bottom: 24px;
+            box-shadow: 0 6px 24px rgba(26,115,232,0.35);
+            position: relative;
+            overflow: hidden;
+        }
+        .gpay-reminder::before {
+            content: '';
+            position: absolute; top: -30px; right: -30px;
+            width: 120px; height: 120px;
+            background: rgba(255,255,255,0.07);
+            border-radius: 50%;
+        }
+        .gpay-reminder::after {
+            content: '';
+            position: absolute; bottom: -20px; right: 60px;
+            width: 80px; height: 80px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 50%;
+        }
+        .gpay-icon {
+            font-size: 36px;
+            line-height: 1;
+            flex-shrink: 0;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+        }
+        .gpay-content { flex: 1; position: relative; z-index: 1; }
+        .gpay-title {
+            font-size: 14px; font-weight: 700;
+            letter-spacing: 0.3px;
+            opacity: 0.85;
+            margin-bottom: 4px;
+        }
+        .gpay-main {
+            font-size: 20px; font-weight: 700;
+            margin-bottom: 10px;
+            line-height: 1.2;
+        }
+        .gpay-pills { display: flex; gap: 8px; flex-wrap: wrap; }
+        .gpay-pill {
+            background: rgba(255,255,255,0.18);
+            border: 1px solid rgba(255,255,255,0.25);
+            border-radius: 20px;
+            padding: 5px 12px;
+            font-size: 12px; font-weight: 600;
+        }
+        .gpay-pill.today {
+            background: #fff;
+            color: #1a73e8;
+            border-color: #fff;
+        }
+        .gpay-pill.next {
+            background: rgba(255,255,255,0.12);
+        }
+        .gpay-pay-btn {
+            background: #fff;
+            color: #1a73e8;
+            border: none;
+            border-radius: 10px;
+            padding: 10px 20px;
+            font-size: 13px; font-weight: 700;
+            cursor: pointer;
+            flex-shrink: 0;
+            align-self: center;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+            transition: all .18s;
+            font-family: 'DM Sans', sans-serif;
+            position: relative; z-index: 1;
+        }
+        .gpay-pay-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(0,0,0,0.2); }
+
+        /* Today due row highlight */
+        tr.due-today td {
+            background: #fff8e1 !important;
+        }
+        tr.due-today td:first-child {
+            border-left: 4px solid #f59e0b;
+        }
+        .due-badge {
+            display: inline-block;
+            background: #ef4444;
+            color: #fff;
+            font-size: 9px;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 10px;
+            margin-left: 6px;
+            letter-spacing: 0.5px;
+            vertical-align: middle;
+            animation: blink 1.5s ease-in-out infinite;
+        }
+        @keyframes blink {
+            0%,100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
     </style>
 </head>
 <body>
@@ -293,6 +396,21 @@
         </div>
     </div>
 
+    <!-- Google Pay Style Reminder Banner -->
+    <div class="gpay-reminder" id="gpay-banner" style="background: linear-gradient(135deg, rgb(55, 65, 81) 0%, rgb(31, 41, 55) 100%);">
+        <div class="gpay-icon">📱</div>
+        <div class="gpay-content">
+            <div class="gpay-title">📅 Mobile EMI — Payment Due</div>
+            <div class="gpay-main" id="gpay-main-text">Next: EMI 1 — 07-06-2026</div>
+            <div class="gpay-pills" id="gpay-pills"><span class="gpay-pill next">📅 07-06-2026</span>
+                           <span class="gpay-pill next">💰 Amount not set</span></div>
+        </div>
+        <button class="gpay-pay-btn" onclick="openGPay()">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Google_Pay_Logo.svg/120px-Google_Pay_Logo.svg.png" onerror="this.style.display='none';this.nextSibling.style.display='inline'" style="height:18px;vertical-align:middle;margin-right:5px;">
+            <span style="display:none">G</span>Pay Now
+        </button>
+    </div>
+
     <!-- PDF-exportable content starts here -->
     <div id="pdf-content">
 
@@ -308,23 +426,23 @@
         <div class="stats-grid" id="stats-grid">
             <div class="stat-card ac">
                 <div class="stat-label">AC Total EMI</div>
-                <div class="stat-value" id="stat-ac-total">—</div>
-                <div class="stat-sub" id="stat-ac-sub">Loading…</div>
+                <div class="stat-value" id="stat-ac-total">₹31,617.26</div>
+                <div class="stat-sub" id="stat-ac-sub">3/7 paid</div>
             </div>
             <div class="stat-card mob">
                 <div class="stat-label">Mobile Total EMI</div>
-                <div class="stat-value" id="stat-mob-total">—</div>
-                <div class="stat-sub" id="stat-mob-sub">Loading…</div>
+                <div class="stat-value" id="stat-mob-total">₹10,690.00</div>
+                <div class="stat-sub" id="stat-mob-sub">1/6 paid</div>
             </div>
             <div class="stat-card paid">
                 <div class="stat-label">Total Paid</div>
-                <div class="stat-value" id="stat-paid">—</div>
-                <div class="stat-sub" id="stat-paid-sub">Combined</div>
+                <div class="stat-value" id="stat-paid">₹21,464.30</div>
+                <div class="stat-sub" id="stat-paid-sub">4 installments paid</div>
             </div>
             <div class="stat-card total">
                 <div class="stat-label">Outstanding</div>
-                <div class="stat-value" id="stat-pending">—</div>
-                <div class="stat-sub" id="stat-pending-sub">Remaining</div>
+                <div class="stat-value" id="stat-pending">₹20,842.96</div>
+                <div class="stat-sub" id="stat-pending-sub">9 installments left</div>
             </div>
         </div>
 
@@ -346,7 +464,42 @@
                             <th style="width:22%">Status</th>
                         </tr>
                     </thead>
-                    <tbody id="ac-tbody"></tbody>
+                    <tbody id="ac-tbody"><tr><td class="sl-num">1</td><td class="due-date">22-03-2026</td><td>Processing Fee</td><td><input class="table-input" type="number" step="0.01" min="0" value="352.82" placeholder="0.00" oninput="save('ac',0,'amt',this.value)"></td><td><input class="table-input" type="date" value="2026-03-24" onchange="save('ac',0,'pDate',this.value)"></td><td>
+                <select class="table-input status-paid" onchange="save('ac',0,'status',this.value);applyStatusClass(this)">
+                    <option value="Paid" selected="">✅ Paid</option>
+                    <option value="Pending">⏳ Pending</option>
+                </select>
+             </td></tr><tr><td class="sl-num">2</td><td class="due-date">22-04-2026</td><td>EMI 1</td><td><input class="table-input" type="number" step="0.01" min="0" value="5210.74" placeholder="0.00" oninput="save('ac',1,'amt',this.value)"></td><td><input class="table-input" type="date" value="2026-04-24" onchange="save('ac',1,'pDate',this.value)"></td><td>
+                <select class="table-input status-paid" onchange="save('ac',1,'status',this.value);applyStatusClass(this)">
+                    <option value="Paid" selected="">✅ Paid</option>
+                    <option value="Pending">⏳ Pending</option>
+                </select>
+             </td></tr><tr><td class="sl-num">3</td><td class="due-date">22-05-2026</td><td>EMI 2</td><td><input class="table-input" type="number" step="0.01" min="0" value="5210.74" placeholder="0.00" oninput="save('ac',2,'amt',this.value)"></td><td><input class="table-input" type="date" value="2026-05-26" onchange="save('ac',2,'pDate',this.value)"></td><td>
+                <select class="table-input status-paid" onchange="save('ac',2,'status',this.value);applyStatusClass(this)">
+                    <option value="Paid" selected="">✅ Paid</option>
+                    <option value="Pending">⏳ Pending</option>
+                </select>
+             </td></tr><tr><td class="sl-num">4</td><td class="due-date">22-06-2026</td><td>EMI 3</td><td><input class="table-input" type="number" step="0.01" min="0" value="5210.74" placeholder="0.00" oninput="save('ac',3,'amt',this.value)"></td><td><input class="table-input" type="date" value="" onchange="save('ac',3,'pDate',this.value)"></td><td>
+                <select class="table-input status-pending" onchange="save('ac',3,'status',this.value);applyStatusClass(this)">
+                    <option value="Paid">✅ Paid</option>
+                    <option value="Pending" selected="">⏳ Pending</option>
+                </select>
+             </td></tr><tr><td class="sl-num">5</td><td class="due-date">22-07-2026</td><td>EMI 4</td><td><input class="table-input" type="number" step="0.01" min="0" value="5210.74" placeholder="0.00" oninput="save('ac',4,'amt',this.value)"></td><td><input class="table-input" type="date" value="" onchange="save('ac',4,'pDate',this.value)"></td><td>
+                <select class="table-input status-pending" onchange="save('ac',4,'status',this.value);applyStatusClass(this)">
+                    <option value="Paid">✅ Paid</option>
+                    <option value="Pending" selected="">⏳ Pending</option>
+                </select>
+             </td></tr><tr><td class="sl-num">6</td><td class="due-date">22-08-2026</td><td>EMI 5</td><td><input class="table-input" type="number" step="0.01" min="0" value="5210.74" placeholder="0.00" oninput="save('ac',5,'amt',this.value)"></td><td><input class="table-input" type="date" value="" onchange="save('ac',5,'pDate',this.value)"></td><td>
+                <select class="table-input status-pending" onchange="save('ac',5,'status',this.value);applyStatusClass(this)">
+                    <option value="Paid">✅ Paid</option>
+                    <option value="Pending" selected="">⏳ Pending</option>
+                </select>
+             </td></tr><tr><td class="sl-num">7</td><td class="due-date">22-09-2026</td><td>EMI 6</td><td><input class="table-input" type="number" step="0.01" min="0" value="5210.74" placeholder="0.00" oninput="save('ac',6,'amt',this.value)"></td><td><input class="table-input" type="date" value="" onchange="save('ac',6,'pDate',this.value)"></td><td>
+                <select class="table-input status-pending" onchange="save('ac',6,'status',this.value);applyStatusClass(this)">
+                    <option value="Paid">✅ Paid</option>
+                    <option value="Pending" selected="">⏳ Pending</option>
+                </select>
+             </td></tr></tbody>
                 </table>
             </div>
         </div>
@@ -369,13 +522,43 @@
                             <th style="width:22%">Status</th>
                         </tr>
                     </thead>
-                    <tbody id="mob-tbody"></tbody>
+                    <tbody id="mob-tbody"><tr><td class="sl-num">1</td><td class="due-date">07-06-2026</td><td>EMI 1</td><td><input class="table-input" type="number" step="0.01" min="0" value="" placeholder="0.00" oninput="save('mob',0,'amt',this.value)"></td><td><input class="table-input" type="date" value="" onchange="save('mob',0,'pDate',this.value)"></td><td>
+                <select class="table-input status-paid" onchange="save('mob',0,'status',this.value);applyStatusClass(this)">
+                    <option value="Paid">✅ Paid</option>
+                    <option value="Pending" selected="">⏳ Pending</option>
+                </select>
+             </td></tr><tr><td class="sl-num">2</td><td class="due-date">07-07-2026</td><td>EMI 2</td><td><input class="table-input" type="number" step="0.01" min="0" value="" placeholder="0.00" oninput="save('mob',1,'amt',this.value)"></td><td><input class="table-input" type="date" value="" onchange="save('mob',1,'pDate',this.value)"></td><td>
+                <select class="table-input status-pending" onchange="save('mob',1,'status',this.value);applyStatusClass(this)">
+                    <option value="Paid">✅ Paid</option>
+                    <option value="Pending" selected="">⏳ Pending</option>
+                </select>
+             </td></tr><tr><td class="sl-num">3</td><td class="due-date">07-08-2026</td><td>EMI 3</td><td><input class="table-input" type="number" step="0.01" min="0" value="" placeholder="0.00" oninput="save('mob',2,'amt',this.value)"></td><td><input class="table-input" type="date" value="" onchange="save('mob',2,'pDate',this.value)"></td><td>
+                <select class="table-input status-pending" onchange="save('mob',2,'status',this.value);applyStatusClass(this)">
+                    <option value="Paid">✅ Paid</option>
+                    <option value="Pending" selected="">⏳ Pending</option>
+                </select>
+             </td></tr><tr><td class="sl-num">4</td><td class="due-date">07-09-2026</td><td>EMI 4</td><td><input class="table-input" type="number" step="0.01" min="0" value="" placeholder="0.00" oninput="save('mob',3,'amt',this.value)"></td><td><input class="table-input" type="date" value="" onchange="save('mob',3,'pDate',this.value)"></td><td>
+                <select class="table-input status-pending" onchange="save('mob',3,'status',this.value);applyStatusClass(this)">
+                    <option value="Paid">✅ Paid</option>
+                    <option value="Pending" selected="">⏳ Pending</option>
+                </select>
+             </td></tr><tr><td class="sl-num">5</td><td class="due-date">07-10-2026</td><td>EMI 5</td><td><input class="table-input" type="number" step="0.01" min="0" value="" placeholder="0.00" oninput="save('mob',4,'amt',this.value)"></td><td><input class="table-input" type="date" value="" onchange="save('mob',4,'pDate',this.value)"></td><td>
+                <select class="table-input status-pending" onchange="save('mob',4,'status',this.value);applyStatusClass(this)">
+                    <option value="Paid">✅ Paid</option>
+                    <option value="Pending" selected="">⏳ Pending</option>
+                </select>
+             </td></tr><tr><td class="sl-num">6</td><td class="due-date">07-11-2026</td><td>EMI 6</td><td><input class="table-input" type="number" step="0.01" min="0" value="" placeholder="0.00" oninput="save('mob',5,'amt',this.value)"></td><td><input class="table-input" type="date" value="" onchange="save('mob',5,'pDate',this.value)"></td><td>
+                <select class="table-input status-pending" onchange="save('mob',5,'status',this.value);applyStatusClass(this)">
+                    <option value="Paid">✅ Paid</option>
+                    <option value="Pending" selected="">⏳ Pending</option>
+                </select>
+             </td></tr></tbody>
                 </table>
             </div>
         </div>
 
         <div class="footer-note" id="pdf-footer">
-            Generated on <span id="gen-date"></span> — EMI Tracker Pro
+            Generated on <span id="gen-date">09 June 2026</span> — EMI Tracker Pro
         </div>
 
     </div><!-- /#pdf-content -->
@@ -406,13 +589,12 @@ const DEFAULT_AC = [
 ];
 
 const DEFAULT_MOB = [
-    { sl:1, date:"07-06-2026", desc:"Processing Fee", amt:"", pDate:"", status:"Pending" },
-    { sl:2, date:"07-07-2026", desc:"EMI 1",          amt:"", pDate:"", status:"Pending" },
-    { sl:3, date:"07-08-2026", desc:"EMI 2",          amt:"", pDate:"", status:"Pending" },
-    { sl:4, date:"07-09-2026", desc:"EMI 3",          amt:"", pDate:"", status:"Pending" },
-    { sl:5, date:"07-10-2026", desc:"EMI 4",          amt:"", pDate:"", status:"Pending" },
-    { sl:6, date:"07-11-2026", desc:"EMI 5",          amt:"", pDate:"", status:"Pending" },
-    { sl:7, date:"07-12-2026", desc:"EMI 6",          amt:"", pDate:"", status:"Pending" }
+    { sl:1, date:"07-06-2026", desc:"EMI 1",  amt:"", pDate:"", status:"Pending" },
+    { sl:2, date:"07-07-2026", desc:"EMI 2",  amt:"", pDate:"", status:"Pending" },
+    { sl:3, date:"07-08-2026", desc:"EMI 3",  amt:"", pDate:"", status:"Pending" },
+    { sl:4, date:"07-09-2026", desc:"EMI 4",  amt:"", pDate:"", status:"Pending" },
+    { sl:5, date:"07-10-2026", desc:"EMI 5",  amt:"", pDate:"", status:"Pending" },
+    { sl:6, date:"07-11-2026", desc:"EMI 6",  amt:"", pDate:"", status:"Pending" }
 ];
 
 // ─── STATE ───────────────────────────────────────────────────────
@@ -565,6 +747,7 @@ async function downloadPDF() {
     document.querySelector('.topbar').style.display    = 'none';
     document.getElementById('stats-grid').style.display = 'none';
     document.getElementById('pdf-footer').style.display = 'none';
+    document.getElementById('gpay-banner').style.display = 'none';
 
     // ── 3. Compact PDF styles ──
     const hero = document.querySelector('.hero');
@@ -616,6 +799,7 @@ async function downloadPDF() {
     document.querySelector('.topbar').style.display    = '';
     document.getElementById('stats-grid').style.display = '';
     document.getElementById('pdf-footer').style.display = 'none';
+    document.getElementById('gpay-banner').style.display = '';
 
     hero.style.cssText = '';
     heroH1.style.cssText = '';
@@ -633,6 +817,85 @@ async function downloadPDF() {
 
 // ─── INIT ─────────────────────────────────────────────────────────
 renderAll();
+highlightTodayDue();
+updateGPayBanner();
+
+// ─── TODAY DUE HIGHLIGHT ──────────────────────────────────────────
+function highlightTodayDue() {
+    const today = new Date();
+    const todayStr = String(today.getDate()).padStart(2,'0') + '-' +
+                     String(today.getMonth()+1).padStart(2,'0') + '-' +
+                     today.getFullYear();
+
+    document.querySelectorAll('#mob-tbody tr, #ac-tbody tr').forEach(tr => {
+        const dateCell = tr.querySelector('.due-date');
+        if (dateCell && dateCell.textContent.trim() === todayStr) {
+            tr.classList.add('due-today');
+            // Add blinking DUE badge
+            const badge = document.createElement('span');
+            badge.className = 'due-badge';
+            badge.textContent = 'DUE TODAY';
+            dateCell.appendChild(badge);
+        }
+    });
+}
+
+// ─── GPAY BANNER UPDATE ───────────────────────────────────────────
+function updateGPayBanner() {
+    const today = new Date();
+    const todayStr = String(today.getDate()).padStart(2,'0') + '-' +
+                     String(today.getMonth()+1).padStart(2,'0') + '-' +
+                     today.getFullYear();
+
+    const todayDue = mobData.filter(r => r.date === todayStr && r.status !== 'Paid');
+    const banner = document.getElementById('gpay-banner');
+    const mainText = document.getElementById('gpay-main-text');
+    const pills = document.getElementById('gpay-pills');
+
+    if (todayDue.length === 0) {
+        // No mob due today — check next upcoming
+        const next = mobData.find(r => r.status !== 'Paid');
+        if (!next) {
+            banner.style.display = 'none';
+            return;
+        }
+        banner.style.background = 'linear-gradient(135deg, #374151 0%, #1f2937 100%)';
+        mainText.textContent = `Next: ${next.desc} — ${next.date}`;
+        pills.innerHTML = `<span class="gpay-pill next">📅 ${next.date}</span>
+                           <span class="gpay-pill next">💰 ${next.amt ? '₹' + parseFloat(next.amt).toLocaleString('en-IN', {minimumFractionDigits:2}) : 'Amount not set'}</span>`;
+        return;
+    }
+
+    // Today due items
+    const names = todayDue.map(r => r.desc).join(' & ');
+    mainText.textContent = `${names} — Due Today! 🔴`;
+
+    let pillHTML = '';
+    todayDue.forEach(r => {
+        const amtText = r.amt ? '₹' + parseFloat(r.amt).toLocaleString('en-IN', {minimumFractionDigits:2}) : '⚠️ Amount not set';
+        pillHTML += `<span class="gpay-pill today">${r.desc}: ${amtText}</span>`;
+    });
+
+    // Add next EMI info
+    const nextPending = mobData.find(r => r.status !== 'Paid' && r.date !== todayStr);
+    if (nextPending) {
+        pillHTML += `<span class="gpay-pill next">⏭ Next: ${nextPending.date} — ${nextPending.desc}</span>`;
+    }
+    pills.innerHTML = pillHTML;
+}
+
+// ─── OPEN GOOGLE PAY ─────────────────────────────────────────────
+function openGPay() {
+    // Try to open Google Pay UPI deep link
+    window.open('upi://pay', '_blank');
+    // Fallback: open Google Pay web
+    setTimeout(() => {
+        if (confirm('Google Pay app open हो गया? नहीं हुआ तो OK press करें — web खुलेगा।')) {
+            window.open('https://pay.google.com', '_blank');
+        }
+    }, 1500);
+}
 </script>
-</body>
-</html>
+
+
+</body></html>
